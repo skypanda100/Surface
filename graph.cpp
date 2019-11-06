@@ -35,11 +35,12 @@ void Graph::onOkClicked(int height, float minLon, float maxLon, float minLat, fl
     QList<float> range;
 //    range << 103.9 << 106.0 << 29.5 << 31.1;
     range << minLon << maxLon << minLat << maxLat;
-    if(!dem->generateImage(static_cast<double>(range[0]),
+    QSurfaceDataArray *surfaceDataArray = dem->generateImage(static_cast<double>(range[0]),
             static_cast<double>(range[1]),
             static_cast<double>(range[2]),
             static_cast<double>(range[3]),
-            precision))
+            precision);
+    if(surfaceDataArray == nullptr)
     {
         QList<float> range = dem->getTifRange();
         QString message = QString::asprintf(
@@ -52,23 +53,23 @@ void Graph::onOkClicked(int height, float minLon, float maxLon, float minLat, fl
         return;
     }
     QList<float> heightRange = dem->getImgHeight();
-    QImage image = dem->getImage();
-    QHeightMapSurfaceDataProxy *layerOneProxy = new QHeightMapSurfaceDataProxy(image);
-    QSurface3DSeries *layerOneSeries = new QSurface3DSeries(layerOneProxy);
-    layerOneSeries->setItemLabelFormat(QStringLiteral("(@xLabel, @zLabel): @yLabel"));
-    layerOneProxy->setValueRanges(range[0], range[1], range[2], range[3]);
-    layerOneSeries->setDrawMode(isGrid ? QSurface3DSeries::DrawWireframe : QSurface3DSeries::DrawSurface);
-    layerOneSeries->setFlatShadingEnabled(isSmooth ? false : true);
-    layerOneSeries->setTextureFile(path);
+    QSurface3DSeries *series = new QSurface3DSeries;
+    series->dataProxy()->resetArray(surfaceDataArray);
+    series->setItemLabelFormat(QStringLiteral("(@xLabel, @zLabel): @yLabel"));
+//    series->dataProxy()->setValueRanges(range[0], range[1], range[2], range[3]);
+    series->setDrawMode(isGrid ? QSurface3DSeries::DrawWireframe : QSurface3DSeries::DrawSurface);
+    series->setFlatShadingEnabled(isSmooth ? false : true);
+    series->setTextureFile(path);
+
     mSurface->axisX()->setLabelFormat("%.1f E");
     mSurface->axisZ()->setLabelFormat("%.1f N");
     mSurface->axisX()->setRange(range[0], range[1]);
-    mSurface->axisY()->setRange(0, height);
+    mSurface->axisY()->setRange(heightRange[0], height);
     mSurface->axisZ()->setRange(range[2], range[3]);
     mSurface->axisX()->setTitle(QStringLiteral("Longitude"));
     mSurface->axisY()->setTitle(QStringLiteral("Height"));
     mSurface->axisZ()->setTitle(QStringLiteral("Latitude"));
-    mSurface->addSeries(layerOneSeries);
+    mSurface->addSeries(series);
 
     QLinearGradient gradient;
     gradient.setColorAt(0.0, Qt::darkGreen);

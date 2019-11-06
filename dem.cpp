@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QList>
 #include <QDebug>
+#include <QVector3D>
 
 static double EPSILON = 0.0001;
 
@@ -73,7 +74,7 @@ void Dem::readData()
     GDALClose(dataset);
 }
 
-bool Dem::generateImage(double minLon, double maxLon, double minLat, double maxLat, int span)
+QSurfaceDataArray *Dem::generateImage(double minLon, double maxLon, double minLat, double maxLat, int span)
 {
     int startCol = static_cast<int>((minLon - mStartX) / mXPrecision);
     int endCol = static_cast<int>((maxLon - mStartX) / mXPrecision);
@@ -81,14 +82,19 @@ bool Dem::generateImage(double minLon, double maxLon, double minLat, double maxL
     int endRow = static_cast<int>((minLat - mStartY) / mYPrecision);
     if(startCol < 0 || endCol > mCol || startRow < 0 || endRow > mRow)
     {
-        return false;
+        return nullptr;
     }
     int col = (endCol - startCol + 1) / span;
     int row = (endRow - startRow + 1) / span;
+    QSurfaceDataArray *dataArray = new QSurfaceDataArray;
+    dataArray->reserve(row);
     for(int i = 0;i < row;i++)
     {
+        float lat = static_cast<float>((i * span + startRow) * mYPrecision + mStartY);
+        QSurfaceDataRow *surfaceDataRow = new QSurfaceDataRow(col);
         for(int j = 0;j < col;j++)
         {
+            float lon = static_cast<float>((j * span + startCol) * mXPrecision + mStartX);
             int index = (i * span + startRow) * mCol + j * span + startCol;
             float data = mData[index];
             if(qAbs(static_cast<double>(data) - mNoValue) > EPSILON)
@@ -101,29 +107,18 @@ bool Dem::generateImage(double minLon, double maxLon, double minLat, double maxL
                 {
                     mMinData = mData[index];
                 }
+                (*surfaceDataRow)[j].setPosition(QVector3D(lon, data, lat));
+            }
+            else
+            {
+                (*surfaceDataRow)[j].setPosition(QVector3D(lon, 0, lat));
             }
         }
+        *dataArray << surfaceDataRow;
     }
     qDebug() << "minimum value is" << mMinData;
     qDebug() << "maximum value is" << mMaxData;
-    float absoluteHeight = mMaxData - mMinData;
-    mImage = QImage(col, row, QImage::Format_RGB888);
-    mImage.fill(QColor(0,0,0));
-    for(int i = 0;i < row;i++)
-    {
-        for(int j = 0;j < col;j++)
-        {
-            int index = (i * span + startRow) * mCol + j * span + startCol;
-            float data = mData[index];
-            if(qAbs(static_cast<double>(data) - mNoValue) > EPSILON)
-            {
-                float height =(data - mMinData) / absoluteHeight * 255;
-                int pix = static_cast<int>(height);
-                mImage.setPixelColor(j, i, QColor(pix, pix, pix));
-            }
-        }
-    }
-    return true;
+    return dataArray;
 }
 
 QImage Dem::getImage()

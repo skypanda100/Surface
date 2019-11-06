@@ -27,7 +27,7 @@ void InputWidget::initUI()
     QLabel *heightLabel = new QLabel("高度");
     mHeightEdit = new QLineEdit;
     mHeightEdit->setValidator(new QIntValidator);
-    mHeightEdit->setText("600");
+    mHeightEdit->setText("10000");
     mHeightEdit->setFixedWidth(50);
 
     QLabel *rangeLabel = new QLabel("范围");

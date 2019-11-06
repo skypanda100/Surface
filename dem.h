@@ -5,10 +5,12 @@
 #include <QFile>
 #include <QTextStream>
 #include <QImage>
+#include <QSurfaceDataArray>
 
 #if _MSC_VER >= 1600
 #pragma execution_character_set("utf-8")
 #endif
+using namespace QtDataVisualization;
 
 class Dem
 {
@@ -18,7 +20,7 @@ public:
     QImage getImage();
     QList<float> getTifRange();
     QList<float> getImgHeight();
-    bool generateImage(double minLon, double maxLon, double minLat, double maxLat, int span);
+    QSurfaceDataArray *generateImage(double minLon, double maxLon, double minLat, double maxLat, int span);
 
 private:
     void readData();
