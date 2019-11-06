@@ -3,7 +3,7 @@
 
 # ScreenShot
 * 不叠加任何图层
-![dewpoint](/screenshot/1.png)
+![surface](/screenshot/1.png)
 
 * 露点温度
 ![dewpoint](/screenshot/2.png)
