@@ -8,5 +8,5 @@
 
 * 叠加全国温度图层 
 
-![dewpoint](https://github.com/skypanda100/Surface/blob/master/screenshot/1.png)
+![dewpoint](screenshot/1.png)
 
