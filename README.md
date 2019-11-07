@@ -4,9 +4,9 @@
 # ScreenShot
 * 不叠加任何图层 
 
-![surface](screenshot/1.png)
+![surface](screenshot/2.png)
 
 * 叠加全国温度图层 
 
-![dewpoint](https://github.com/skypanda100/Surface/blob/master/screenshot/2.png)
+![dewpoint](https://github.com/skypanda100/Surface/blob/master/screenshot/1.png)
 
